@@ -1,0 +1,27 @@
+AWS TUTORIALS:
+<--------IAM---------------->
+
+1)
+Users: Users are persons identities used for accessing aws.
+Groups: These are used to add multiple users in-order to attach same policies across multiple users.
+Roles: These are used to assume identities which get temporary credentials to
+the aws, which is used by aws resources,services,etc.
+Policies: These specifies the permissible actions a user or a role can
+perform. It is written in a JSON format.
+
+2)
+Principle of least privilege is the way of giving the minimum access to the
+user of role that they needed. It has to be followed that the identity which
+has this policies won't be able to do anything apart form what they are
+supposed to do. Which prevents from accidential actions.
+
+3)
+Identity based policy: These are the policies which we attached to identities
+such as Users, Groups, Roles.Which helps to specify the actions they can do
+on the resources.
+Resource based policy: These are the policies which we attaches to the aws
+resources such as s3, SNS, lambda, etc.includes principal which specifies who
+can access the resources.
+
+
+ 
