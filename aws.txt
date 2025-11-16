@@ -23,5 +23,34 @@ Resource based policy: These are the policies which we attaches to the aws
 resources such as s3, SNS, lambda, etc.includes principal which specifies who
 can access the resources.
 
+4)
+AWS managed policies:
+These are the policies maintained by aws itself.Also updated by AWS. We are
+not able to edit the policies.
+Customer managed policies:
+These are the policies maintained by the aws users. We are fully able to edit
+the policies.
 
- 
+5)
+MFA(Multi Factor Authenticator): Enabling this requires using an addition of
+factor to authenticate while we are sign in or assume role.
+Using MFA prevents misuse of our credential, even though the credentials got
+stole.
+
+6)
+Service linked roles:
+These roles are predefined for certain services with specific trust
+relationships. Which makes the role used by that service only.
+Standard IAM role:
+These roles are created by us, where we can define the trust and permissions.
+Which are able to be used by all pricipals we specify.
+
+7)
+Auditing IAM activity using cloudtrail:
+Enable cloudtrail in aws account for all region.
+Review cloudtrail event history for a certain history, events,etc.
+Store cloudtrail logs in s3 , which helps us to audit logs using athena
+We can set cloudwatch alarms for crtitical actions.
+
+
+<-----------------EC2 & LAMBDA -----------------------> 
