@@ -53,4 +53,123 @@ Store cloudtrail logs in s3 , which helps us to audit logs using athena
 We can set cloudwatch alarms for crtitical actions.
 
 
-<-----------------EC2 & LAMBDA -----------------------> 
+<-----------------EC2 & LAMBDA ----------------------->
+
+1)INSTANCE TYPES AND DIFFERENCE:
+General Purpose: Balanced compute, memory, networking. Suitable for web servers, small databases.
+Compute Optimized: High CPU performance instances, used for compute intensive
+tasks like batch operations, high performance applications, etc.
+Memory Optimized: High memory to CPU ratio instances used for in memory databases, caching,
+analytics, etc.
+Storage Optimized: Instances with high sequential I/O and low-latency storage for databases and big data workloads.
+Accelerated Computing :Instances with GPUs or special accelerators for ML, AI inference, HPC, graphics processing.
+
+2)Key components of ASG:
+Launch template/ Launch configuration: 
+VPC subnets:
+Desired, minimum , maximum capacity:
+Scaling policies:
+Health checks:
+
+3)Scaling policies works when the specified capacity reaches. It either
+increases the capacity or decreses the capacity as per the specification.
+Types of scaling policies:
+Target Tracking Scaling:
+We specify some target like CPU-50%, so the ASG will maintain the total Usage
+of CPU in the instances 50%.
+Step Scaling:
+Scaling happens in steps based on CloudWatch alarm thresholds.
+Example: CPU > 70% → add 2 instances.
+
+Simple Scaling:
+One action per CloudWatch alarm.
+
+4)Load Balancers:
+Application load balancers:Layer 7, supports HTTPS and HTTP.Best of
+microservices,path-host based mapping.
+Network load balancer:Layer 4, TCP and UDP are supported. Best for ultra low
+latency , real time traffic or high performance usages.
+Gateway load balancer: For 3rd-party virtual appliances like firewalls/IDS/IPS 
+Classic load balancer: Supports basic L4/L7 routing.Legacy type.
+
+5)Application load balancer uses round robin algorithm to distribute traffics
+among TGs. Which send traffic to each TG one by one, also to the healthy TGs
+only.
+
+6)A target group is a logical grouping of backend targets (EC2, IPs, Lambda).
+ALB routes incoming requests to a specific target group based on your routing
+rules (path/host).Each target group has its own health checks, so unhealthy instances are automatically removed from rotation.
+
+
+7)We can configure host and path based routing in ALB listeners.
+we are able to route a host (eg.demo.com) into a certain TG. Just like a path
+(/images) into a certain TG.
+
+8)Security Groups are statefull firewall attached to aws resources like EC2,
+ALB, ENI, etc. Which handles the incoming anf outgoing of the traffic into
+resources from certain ips.
+
+9)NACL is stateless. while Security Groups are statefull. Which means if a
+certain ip is able to go into a resource via SG, it can come out as the SG are
+statefull. But in NACL, even if the traffic from an ip went into subnet, it
+cannot come out with response unless we specifically allow outgoing as well,
+as NACL is stateless.
+
+10) In the SG we will open an inbound rule where the type of the port will be
+22 (SSH) and insource range we will mention the ip range.
+
+11) AWS will not allow us to delete an SG which is attached to a instance. We
+can only delete an SG after detaching it from EC2. If we detaches and delete
+the SG, the traffic rules we mentioned in the SG ont be able to communicate
+with the ips.
+
+12)EBS VOLUMES:
+GP2&GP3: These are the deafult choice of EBS. Uses for boot
+volumes,low-latency applications,etc.
+io2/io1 (Provisioned IOPS SSD): High IOPS for databases like Oracle/SQL.
+st1 (Throughput HDD): Big data, streaming workloads.
+sc1 (Cold HDD): Infrequent access, archival.
+magnetic: only for infrequently accessed workloads.
+
+13)we can modify the size of the volume via cli or console. volume increases
+instantly. we can use the growpart and resize2fs for extending the file
+systems.
+
+14)EBS snapshot is the point in time copy of EBS volume. We can store these
+snapshots in s3 and vaults, which can be used for recovery and backups.
+
+15)We can enable encrypt option while creating an EBS volume. If the volume is
+already created as unencrypted, create a snap with it, and encrypt it while
+creating a ebs volume with it.
+Benfits of ebs encryption includes data in rest, transit will be encrypted.
+
+16) EBS are block storages, used to attach to one instance at a time. 
+EFS are file storage systems, used to attach multiple instances.
+
+17)AWS Lambda lets run code without provisioning servers.You only pay for execution time.
+AWS manages scaling, patching, and capacity.
+
+18)Impacting factors:
+Large package size
+VPC-enabled Lambdas
+Runtime type (Java/.NET slower vs Python/Node faster)
+Provisioned concurrency not enabled
+
+How to minimize:
+Use smaller deployment packages
+Prefer Python/Node runtimes (Lighter runtimes)
+Enable Provisioned Concurrency
+Use snapstart(Java runtimes)
+Keep Lambda outside a VPC unless necessary 
+
+19)A Savings Plan provides lower prices for EC2 usage in exchange for a 1–3
+year commitment to a consistent hourly spend.
+
+20)Compute savings plan: It is the savings plan which we get buy on certain
+computation limit. It can cover instances, lambda computation costs.
+EC2 instance saving plan: Its the plan which we buy on certain instance
+family. 
+
+21)Savings Plans are more flexible than Reserved Instances.
+Reserved Instances are tied to specific instance types, sizes, regions.
+Savings Plans apply automatically across workloads.
