@@ -166,3 +166,101 @@ family.
 21)Savings Plans are more flexible than Reserved Instances.
 Reserved Instances are tied to specific instance types, sizes, regions.
 Savings Plans apply automatically across workloads.
+
+
+<----------EKS&ECR--------------------->
+
+1)EKS core components:
+->Control Plane:
+API server:
+etcd:
+scheduler:
+controller manager:
+->Worker Nodes:
+application pods:
+kublet+kube-proxy
+->Node Groups:
+->Adds on/Plugins
+VPC CNI plugin
+kube proxy
+CoreDNS
+
+2)Each EKS node is launched inside a VPC subnet.
+Pods receive ENIs and IP addresses from the VPC using the VPC CNI plugin.
+Security Groups control traffic to nodes and the control plane.
+Public subnets are used for internet-facing load balancers.
+Private subnets are used for internal workloads.
+
+3)Managed node groups:
+This is managed and maintained by AWS, which includes the lifecycle,automatic
+upgrades, fully automated provisioning,and health of node is also managed by
+AWS.
+Self managed node groups:
+The users are responsible for the maintenance, upgrade, provisioning (script
+or ASG), node health checks, etc.
+
+4)Authentication:
+IAM is used to authenticate users and roles via AWS IAM → Kubernetes API mapping.
+This mapping is stored in the aws-auth ConfigMap.
+Authorization:
+After authentication, Kubernetes RBAC determines what the user can do.
+
+IAM = WHO can access
+RBAC = WHAT they can do 
+
+5)High Availability:
+
+Control plane is deployed across multiple Availability Zones automatically.
+Worker nodes can be placed across multiple AZs.
+Managed node groups maintain node health automatically.
+
+Scaling:
+Cluster Autoscaler → Scales worker nodes based on pending pods.
+Horizontal Pod Autoscaler (HPA) → Scales pods based on CPU/memory/custom metrics.
+Vertical Pod Autoscaler (VPA) → Adjusts pod resource requests.
+
+6)LoadBalancer Service
+Ingress + ALB Ingress Controller
+NodePort Service
+
+7)VPC CNI(Container Network Interface), which is providing ip to the pods.
+Its important cause then only the pods will be able to directly use vpc
+netowkring. reduce network hurdles and improve performance.
+
+8)Kubernetes RBAC (Role-Based Access Control) defines permissions for users,groups, and service accounts.
+It uses:
+Roles → Namespace-level permissions
+ClusterRoles → Cluster-wide permissions
+RoleBindings / ClusterRoleBindings → Associate roles with users
+In EKS, RBAC works together with IAM.
+IAM authenticates → RBAC authorizes.
+
+9)AWS VPC CNI (native, modern approach)
+Enable network policy support in the VPC CNI add-on
+Optionally enable strict mode
+Apply standard Kubernetes NetworkPolicy objects
+Enforcement happens using eBPF for high performance
+
+Option 2: Third-party CNI like Calico
+Deploy Calico
+Use it to enforce Kubernetes NetworkPolicy
+Useful for advanced or enterprise-grade policy features
+
+10)ECR:
+Fully managed, secure, private container registry by AWS.
+Stores Docker/OCI images close to EKS/ECS environments.
+Integrates with IAM for authentication.
+Docker Hub is a general container registry which has certain pull limits while
+aws doesnt have. We can access docker hub using username and password, while
+ecr is accessible using iam.
+
+11).ECR Private:
+Our own private registry.
+Access controlled via IAM.
+Used for internal corporate images.
+Images stored within our AWS account.
+
+ECR Public:
+Publicly accessible registry.
+No authentication needed to pull images.
+Used for distributing open-source or public container images.
