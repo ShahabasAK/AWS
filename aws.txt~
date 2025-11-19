@@ -264,3 +264,110 @@ ECR Public:
 Publicly accessible registry.
 No authentication needed to pull images.
 Used for distributing open-source or public container images.
+
+
+<-----------------Route53----------------->
+
+1)Amazon Route 53 is a highly available and scalable DNS and domain management service from AWS.
+Key Features:
+DNS service with global low-latency resolution
+Domain name registration
+Health checks & DNS failover
+Traffic routing policies (weighted, latency-based, geolocation, failover,etc.)
+Private DNS inside VPCs
+Integration with AWS services like ALB, CloudFront, S3
+100% availability SLA
+It ensures reliable routing of user traffic to web applications.
+
+2) A record type: Maps a domain name to an IPv4 address.
+AAAA record type: Maps a domain name to an IPv6 address.
+CAA record type: Specifies which certificate authorities (CAs) are allowed to issue SSL/TLS certificates for your domain.
+CNAME record type: Maps one domain name to another domain name.
+DS record type: Delegation Signer, used to establish a chain of trust for DNSSEC.
+HTTPS record type: Modern record type that defines HTTPS or HTTP/3 service configurations,
+MX record type: Specifies mail servers responsible for receiving email for the domain.
+NAPTR record type: Used for advanced rewriting rules (mostly for VoIP, SIP,ENUM).
+NS record type: Defines the authoritative name servers for a domain or zone.
+PTR record type: Used in reverse DNS lookup.Maps an IP address back to a domain name.
+SOA record type: Contains administrative information about a DNS zone,including:Primary name server,Admin email,Zone serial number,Refresh and retry intervals
+SPF record type: A type of TXT record that specifies which mail servers are allowed to send emails on behalf of your domain.
+SRV record type: Specifies the location of services (host + port).
+SSHFP record type: Stores SSH public key fingerprints.
+SVCB record type: A modern record type used to improve service discovery and enable HTTP/3 and encrypted DNS.
+TLSA record type:Used with DNSSEC + TLS (DANE protocol).Specifies which TLS certificate or public key should be trusted for a domain.
+TXT record type:Stores arbitrary text. Common uses:Domain verification (AWS, Google, etc.),SPF (as TXT),DKIM keys,Metadata or policy data
+
+3)Public Hosted Zone:
+Accessible on the internet
+Used for public websites (example.com)
+Private Hosted Zone:
+Visible only inside one or more VPCs
+Used for internal services (database, microservices)
+Provides private DNS resolution
+
+4)Route 53 supports multiple routing policies to control how traffic is
+distributed:
+-> Simple Routing
+Single resource
+Basic DNS response
+No load balancing
+-> Weighted Routing
+Assign weight values to multiple endpoints
+Used for A/B testing or gradual rollouts
+-> Latency-based Routing
+Sends users to the AWS region with lowest latency
+Ideal for global applications
+-> Geolocation Routing
+Routes users based on their geographical location
+Useful for compliance or localized content
+-> Failover Routing
+Primary → Secondary failover based on health checks
+Used for disaster recovery
+-> Multi-value Answer Routing
+Returns multiple healthy IPs
+Basic DNS-based load balancing
+
+5)Alias Record (Route 53–specific):
+Points a domain to AWS resources like:
+ALB
+CloudFront
+S3 websites
+API Gateway
+Free of charge
+Can be used at root domain (example.com)
+CNAME Record:
+Points a domain → another domain
+Cannot be used at root domain
+Standard DNS behavior
+
+6)With Application Load Balancer (ALB):
+Create an Alias record to the ALB DNS name
+ALB IPs change dynamically → Alias automatically tracks it
+With CloudFront:
+Domain mapped to CloudFront distribution using CNAME or Alias
+Often used for static + dynamic global content delivery
+With S3 Static Websites:
+Alias record pointing to S3 website endpoint
+Used for hosting static sites
+Route 53 ensures seamless routing to these AWS-managed endpoints.
+
+7)Route 53 enables multi-region DR using:
+
+-> Failover Routing
+Primary Region = Active
+Secondary Region = Standby
+If health check fails, Route 53 routes traffic to DR region automatically
+
+-> Latency-based Routing
+Active/Active setup
+Users routed to nearest healthy region
+High performance and redundancy
+
+-> Weighted Routing
+Gradually shift traffic between regions
+Useful during controlled failover testing
+
+-> Health Checks
+Continuously monitors endpoints
+Automatically removes unhealthy endpoints from DNS responses
+
