@@ -414,3 +414,167 @@ CloudFront origin access ensures only CloudFront can read the bucket.
 Signed URL/Cookies ensure only authorized users can access files through
 CloudFront.
 
+<-------------VPC----------------------->
+1)Public Subnet:
+Has a route to the Internet Gateway (IGW)
+Resources can receive public IPs
+Instances are reachable from the internet (if security groups allow)
+
+Private Subnet:
+No route to the Internet Gateway
+Used for internal resources (DB, backend services)
+Can access the internet only via NAT Gateway for outbound traffic
+No public IP assigned
+
+2)A route table defines how network traffic is routed within the VPC.
+
+How it works:
+Each subnet must be associated with one route table
+Routes determine the destination (e.g., local VPC, IGW, NAT, TGW, Peering)
+The “local” route is automatically added for VPC internal communication
+
+Association:
+A subnet can be associated with only one route table
+A route table can be associated with multiple subnets
+
+3)Internet Gateway enables communication between VPC resources and the public
+internet.
+
+IGW functions:
+Provides a target for public subnets’ route tables
+Performs NAT for instances with public IPs
+Handles bi-directional internet traffic
+
+To enable internet access:
+Subnet route table must point to IGW
+Instance must have a public IP or Elastic IP
+Security groups allow outbound/inbound rules
+
+4)NAT Gateway allows instances in private subnets to access the internet
+Does NOT allow inbound traffic from the internet
+Uses public IP but sits in a public subnet
+
+IGW supports internet access for resources in public subnets, with inbound and
+outbound traffic.While NATgateway is placed on public subnet, but used for the
+outbound access for the resourcs in private subnet with outbound access.
+
+5)VPC Peering connects two VPCs using private IPs
+Traffic flows over AWS internal network
+Low cost and simple configuration
+No transitive routing (A → B → C not allowed)
+
+When to use:
+Small number of VPCs
+Simple, low-latency communication
+Direct connection between two VPCs
+
+When NOT to use:
+Large multi-VPC architectures
+Need hub-and-spoke routing → use Transit Gateway
+
+6)Yes, peering supports:
+Cross-account
+Cross-region
+
+How:
+VPC owner A sends a Peering Connection Request
+VPC owner B accepts the request
+Route tables must be updated on both sides
+Security groups updated to allow inbound traffic from peer VPC
+No overlapping CIDR ranges allowed.
+
+7)Best practices:
+Deploy NAT Gateway in each Availability Zone
+Create separate private subnets per AZ, each routing to its local NAT
+Avoid cross-AZ routing (extra charges + single point of failure)
+Use NAT Gateway health checks implicitly done by AWS
+Use AWS Backup or IaC to recreate NAT in case of issues
+
+8)Route Table Security:
+Ensure only public subnets route to IGW
+Private subnets should use NAT Gateway
+Avoid overly broad VPC Peering/TGW routes
+
+NAT Gateway Security:
+Use separate NAT per AZ
+Inspect traffic using VPC Traffic Mirroring if needed
+Do NOT expose NAT Gateway to inbound traffic
+
+Internet Gateway Security:
+Allow inbound only what is required in Security Groups
+Route only public subnets to IGW
+Avoid placing sensitive services in public subnets
+
+General Best Practices:
+Enable VPC Flow Logs
+Use NACLs as an optional additional layer
+Restrict Security Groups with least privilege rules
+
+9)VPC Flow Logs capture network traffic information at the:
+VPC level
+Subnet level
+ENI (instance) level
+
+How they help troubleshoot:
+Identify dropped packets (REJECT entries)
+Check if traffic is reaching the instance
+Verify security group or NACL blocking
+Identify misconfigured routes
+Detect abnormal traffic patterns
+Inspect source/destination IPs and ports
+
+Typical process:
+Enable VPC Flow Logs for the ENI/subnet
+Examine logs in CloudWatch or S3
+Look for ACCEPT/REJECT and cause
+Fix SG/NACL/route table accordingly
+
+<--------------CLOUDWATCH&METRICS----------------->
+1)CloudWatch Metrics:
+Numerical data points collected from AWS services (e.g., EC2 CPU, disk I/O,
+Lambda duration).
+Updated at fixed intervals (1-minute or 5-minute).
+Used to track resource performance and health.
+
+CloudWatch Logs:
+Stores application logs, system logs, VPC Flow Logs, Lambda logs, etc.
+Supports log retention, filtering, and searching.
+Used for debugging, auditing, and operational insights.
+
+CloudWatch Alarms:
+Watches a metric over time and triggers an action when a threshold is crossed.
+Actions include SNS notifications, Auto Scaling actions, or EC2
+stop/terminate/reboot.
+Enables automated reaction to AWS events.
+
+How they help:
+Provide full visibility into AWS resource performance.
+Detect abnormal behavior (high CPU, errors, latency).
+Trigger automated responses to maintain system health.
+Centralize logs for analysis and troubleshooting.
+
+2)->Choose the Metric
+Go to CloudWatch → Metrics → EC2 → Select CPUUtilization for the instance.
+->Create an Alarm
+Click Create Alarm.
+Set threshold, e.g.:CPUUtilization > 80% for 5 minutes.
+
+->Define the Alarm Condition
+Example:
+Statistic: Average
+Period: 300 seconds
+Threshold: > 80%
+
+->Configure Actions
+Choose what happens when alarm is triggered:
+SNS Notification (email/SMS)
+Auto Scaling action (trigger scale-out)
+EC2 action (stop/terminate/reboot instance)
+
+->Review and Create
+Alarm switches to ALARM state when CPU exceeds threshold.
+Action is executed automatically.
+
+3)CloudWatch Logs Insights is an interactive log analysis tool that allows you to run fast,
+SQL-like queries on your CloudWatch Logs. It helps to efficiently search, filter, and visualize large volumes of log data to
+troubleshoot issues, find errors, analyze performance, and generate operational insights in seconds.

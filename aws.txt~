@@ -371,3 +371,46 @@ Useful during controlled failover testing
 Continuously monitors endpoints
 Automatically removes unhealthy endpoints from DNS responses
 
+<-----------S3&CLOUDFRONT----------->
+1)CloudFront is a Content Delivery Network (CDN) that caches S3 objects at edge
+locations around the world.
+How it works:
+A user requests an object (image, video, file).
+CloudFront checks the nearest edge location:
+If cached → returns immediately (low latency).
+If not cached → fetches from S3 (origin), caches it, and serves it.
+Next users get the content directly from the cache.
+
+2)An S3 bucket policy is a JSON document that defines permissions at the
+bucket level.
+To allow CloudFront to serve private S3 content, you attach a bucket policy
+that grants access to:
+Option 1: CloudFront Origin Access Identity (OAI)
+You allow the OAI to read the S3 bucket.
+Option 2: CloudFront Origin Access Control (OAC) (recommended)
+OAC signs requests using SigV4 and is more secure.
+
+3)Cloudfront supports caching and low latency deleivery, with private access
+to the bucket using OAI or OAC.While S3 static web hosting doesnt support
+caching, bucket has to be public.Uses only for static hosting for HTML,JS,CSS
+
+4)How caching works:
+CloudFront caches objects at edge locations.
+Cache duration controlled by:
+Cache-Control headers in S3
+TTL settings in CloudFront behavior
+
+Invalidating cached objects:
+You can remove outdated cached content using a CloudFront invalidation.
+
+5)Signed URLs and Signed Cookies provide controlled, time-limited access to
+private content.
+Signed URLs: Give temporary access to individual objects.
+Signed Cookies: Provide access to multiple objects under a path or domain.
+
+How they secure S3 content:
+S3 bucket blocks direct public access.
+CloudFront origin access ensures only CloudFront can read the bucket.
+Signed URL/Cookies ensure only authorized users can access files through
+CloudFront.
+
